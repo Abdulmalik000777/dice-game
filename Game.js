@@ -1,5 +1,5 @@
 const FairRandomGenerator = require("./FairRandomGenerator");
-
+const HMACGenerator = require("./HMACGenerator");
 class Game {
   constructor(diceArray, cli) {
     this.diceArray = diceArray;
@@ -7,11 +7,22 @@ class Game {
     this.userScore = 0;
     this.computerScore = 0;
     this.turns = 0;
+    this.rounds = 0;
+    this.maxRounds = 3;
     this.computerKey = null;
     this.computerValue = null;
   }
 
   start() {
+    while (this.rounds < this.maxRounds) {
+      console.log(`Starting round ${this.rounds + 1}`);
+      this.playRound();
+      this.rounds++;
+    }
+    this.endGame();
+  }
+
+  playRound() {
     this.determineFirstMove();
   }
 
@@ -155,7 +166,7 @@ class Game {
 
   checkGameEnd() {
     if (this.turns >= 6) {
-      this.endGame();
+      this.endRound();
     } else {
       if (this.turns % 2 === 0) {
         this.userTurn();
@@ -165,15 +176,37 @@ class Game {
     }
   }
 
+  endRound() {
+    console.log("Round over!");
+    console.log(`Your score: ${this.userScore}`);
+    console.log(`Computer's score: ${this.computerScore}`);
+
+    // Reset turns for the next round
+    this.turns = 0;
+
+    if (this.userScore > this.computerScore) {
+      console.log("You win this round!");
+    } else if (this.computerScore > this.userScore) {
+      console.log("I win this round!");
+    } else {
+      console.log("It's a tie this round!");
+    }
+
+    // Reset scores for the next round
+    this.userScore = 0;
+    this.computerScore = 0;
+  }
+
   endGame() {
     console.log("Game over!");
+    console.log(`Final score:`);
     console.log(`Your score: ${this.userScore}`);
     console.log(`Computer's score: ${this.computerScore}`);
 
     if (this.userScore > this.computerScore) {
-      console.log("You win!");
+      console.log("You win the game!");
     } else if (this.computerScore > this.userScore) {
-      console.log("I win!");
+      console.log("I win the game!");
     } else {
       console.log("It's a tie!");
     }

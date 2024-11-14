@@ -1,10 +1,18 @@
 require("dotenv").config();
-
+const readlineSync = require("readline-sync");
+const crypto = require("crypto");
 const Dice = require("./Dice");
 const Game = require("./Game");
 const CLI = require("./CLI");
 
-// Get arguments from the environment variable or command line
+function generateKey() {
+  return crypto.randomBytes(16).toString("hex");
+}
+
+function calculateHMAC(key, message) {
+  return crypto.createHmac("sha256", key).update(message).digest("hex");
+}
+
 const args = process.env.DICE_ARGS
   ? process.env.DICE_ARGS.split(" ")
   : process.argv.slice(2);
@@ -23,13 +31,9 @@ if (diceConfigs.some((config) => config.length !== 6)) {
   process.exit(1);
 }
 
-// Create Dice instances
 const diceArray = diceConfigs.map((config) => new Dice(config));
-
-// Initialize CLI and Game
 const cli = new CLI(diceArray);
 const game = new Game(diceArray, cli);
 cli.setGame(game);
 
-// Start the game
 game.start();

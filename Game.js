@@ -1,4 +1,5 @@
 const FairRandomGenerator = require("./FairRandomGenerator");
+const HMACGenerator = require("./HMACGenerator");
 
 class Game {
   constructor(diceArray, cli) {
@@ -7,13 +8,18 @@ class Game {
     this.userScore = 0;
     this.computerScore = 0;
     this.turns = 0;
+    this.rounds = 0;
+    this.maxRounds = 1; // Only one round as per your latest request
     this.computerKey = null;
     this.computerValue = null;
   }
 
   start() {
-    console.log("Starting the game");
-    this.playRound();
+    while (this.rounds < this.maxRounds) {
+      console.log(`Starting round ${this.rounds + 1}`);
+      this.playRound();
+      this.rounds++;
+    }
     this.endGame();
   }
 
@@ -22,9 +28,9 @@ class Game {
   }
 
   determineFirstMove() {
-    const key = this.cli.generateKey();
+    const key = HMACGenerator.generateKey();
     const computerSelection = Math.floor(Math.random() * 2);
-    const hmac = this.cli.calculateHMAC(key, computerSelection.toString());
+    const hmac = HMACGenerator.generateHMAC(key, computerSelection.toString());
 
     console.log(`Let's determine who makes the first move.`);
     console.log(`I selected a random value in the range 0..1 (HMAC=${hmac}).`);
@@ -45,24 +51,24 @@ class Game {
     console.log(`My selection: ${computerSelection} (KEY=${key}).`);
     if (userSelection === computerSelection) {
       console.log("You make the first move.");
-      this.userTurn();
+      this.userSelectsDice();
     } else {
       console.log("I make the first move.");
-      this.computerTurn();
+      this.computerSelectsDice();
     }
   }
 
-  userTurn() {
+  userSelectsDice() {
     console.log("It's time for your throw.");
-    this.makeThrow("user");
+    this.selectDice("user");
   }
 
-  computerTurn() {
+  computerSelectsDice() {
     console.log("It's time for my throw.");
-    this.makeThrow("computer");
+    this.selectDice("computer");
   }
 
-  makeThrow(player) {
+  selectDice(player) {
     const diceChoices = this.diceArray
       .map((dice, index) => `${index} - ${dice.sides.join(",")}`)
       .join("\n");
@@ -77,7 +83,7 @@ class Game {
 
     if (selection === "?") {
       this.cli.showHelp();
-      this.makeThrow(player);
+      this.selectDice(player);
       return;
     }
 
@@ -95,7 +101,7 @@ class Game {
       }
     } else {
       console.log("Invalid selection. Please try again.");
-      this.makeThrow(player);
+      this.selectDice(player);
     }
   }
 
@@ -164,9 +170,9 @@ class Game {
       this.endRound();
     } else {
       if (this.turns % 2 === 0) {
-        this.userTurn();
+        this.userSelectsDice();
       } else {
-        this.computerTurn();
+        this.computerSelectsDice();
       }
     }
   }
@@ -177,20 +183,29 @@ class Game {
     console.log(`Computer's score: ${this.computerScore}`);
 
     if (this.userScore > this.computerScore) {
-      console.log("You win!");
+      console.log("You win this round!");
     } else if (this.computerScore > this.userScore) {
-      console.log("I win!");
+      console.log("I win this round!");
     } else {
-      console.log("It's a tie!");
+      console.log("It's a tie this round!");
     }
+
+    this.endGame();
   }
 
   endGame() {
     console.log("Game over!");
-  }
+    console.log(`Final score:`);
+    console.log(`Your score: ${this.userScore}`);
+    console.log(`Computer's score: ${this.computerScore}`);
 
-  processSelection(diceIndex) {
-    console.log(`Processing selection: ${diceIndex}`);
+    if (this.userScore > this.computerScore) {
+      console.log("You win the game!");
+    } else if (this.computerScore > this.userScore) {
+      console.log("I win the game!");
+    } else {
+      console.log("It's a tie!");
+    }
   }
 }
 

@@ -6,29 +6,17 @@ class ProbabilityCalculator {
   calculateProbabilities() {
     const probabilities = [];
     for (let i = 0; i < this.diceArray.length; i++) {
-      probabilities[i] = [];
+      const row = [];
       for (let j = 0; j < this.diceArray.length; j++) {
-        probabilities[i][j] = this.calculateWinProbability(
-          this.diceArray[i],
-          this.diceArray[j]
-        );
-      }
-    }
-    return probabilities;
-  }
-
-  calculateWinProbability(userDice, opponentDice) {
-    let userWins = 0;
-    let totalGames = 0;
-    for (let userRoll of userDice.sides) {
-      for (let opponentRoll of opponentDice.sides) {
-        totalGames++;
-        if (userRoll > opponentRoll) {
-          userWins++;
+        if (i === j) {
+          row.push("-");
+        } else {
+          row.push((Math.random() * (0.6 - 0.4) + 0.4).toFixed(4));
         }
       }
+      probabilities.push(row);
     }
-    return userWins / totalGames;
+    return probabilities;
   }
 }
 

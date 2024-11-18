@@ -1,39 +1,30 @@
-require("dotenv").config();
-const readlineSync = require("readline-sync");
-const crypto = require("crypto");
-const Dice = require("./Dice");
 const Game = require("./Game");
 const CLI = require("./CLI");
 
-function generateKey() {
-  return crypto.randomBytes(16).toString("hex");
-}
+// Command-line arguments (excluding node and script path)
+const args = process.argv.slice(2);
 
-function calculateHMAC(key, message) {
-  return crypto.createHmac("sha256", key).update(message).digest("hex");
-}
+// Validate the dice configurations
+const diceConfigs = args.map((arg) => {
+  const config = arg.split(",").map(Number);
+  if (config.some(isNaN) || config.length !== 6) {
+    console.error(
+      "Error: Each dice configuration must contain exactly six integers."
+    );
+    process.exit(1);
+  }
+  return config;
+});
 
-const args = process.env.DICE_ARGS
-  ? process.env.DICE_ARGS.split(" ")
-  : process.argv.slice(2);
-
-if (args.length < 3) {
-  console.error("Error: Please provide at least three dice configurations.");
-  console.error("Example: node index.js 2,2,4,4,9,9 6,8,1,1,8,6 7,5,3,7,5,3");
+// Ensure at least three dice configurations are provided
+if (diceConfigs.length < 3) {
+  console.error("Error: You must provide at least three dice configurations.");
   process.exit(1);
 }
 
-const diceConfigs = args.map((arg) => arg.split(",").map(Number));
-if (diceConfigs.some((config) => config.length !== 6)) {
-  console.error(
-    "Error: Each dice configuration must contain exactly six integers."
-  );
-  process.exit(1);
-}
+// Instantiate the CLI and Game objects
+const cli = new CLI(diceConfigs);
+const game = new Game(diceConfigs, cli);
 
-const diceArray = diceConfigs.map((config) => new Dice(config));
-const cli = new CLI(diceArray);
-const game = new Game(diceArray, cli);
-cli.setGame(game);
-
+// Start the game
 game.start();

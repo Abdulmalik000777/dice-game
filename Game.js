@@ -2,19 +2,18 @@ const FairRandomGenerator = require("./FairRandomGenerator");
 
 class Game {
   constructor(diceArray, cli) {
-    this.diceArray = diceArray;
+    this.diceArray = diceArray.map((config) => ({ sides: config }));
     this.cli = cli;
     this.userScore = 0;
     this.computerScore = 0;
     this.turns = 0;
-    this.computerKey = null;
-    this.computerValue = null;
+    this.userDice = null;
+    this.computerDice = null;
   }
 
   start() {
     console.log("Starting the game");
     this.playRound();
-    this.endGame();
   }
 
   playRound() {
@@ -34,128 +33,126 @@ class Game {
     console.log(`X - exit`);
     console.log(`? - help`);
 
-    const selection = this.cli.promptUser("Your selection: ");
-
-    if (selection === "X" || selection === "x") {
-      console.log("Exiting the game.");
-      return;
-    }
-
-    const userSelection = parseInt(selection);
-    console.log(`My selection: ${computerSelection} (KEY=${key}).`);
-    if (userSelection === computerSelection) {
-      console.log("You make the first move.");
-      this.userTurn();
-    } else {
-      console.log("I make the first move.");
-      this.computerTurn();
-    }
-  }
-
-  userTurn() {
-    console.log("It's time for your throw.");
-    this.makeThrow("user");
-  }
-
-  computerTurn() {
-    console.log("It's time for my throw.");
-    this.makeThrow("computer");
-  }
-
-  makeThrow(player) {
-    const diceChoices = this.diceArray
-      .map((dice, index) => `${index} - ${dice.sides.join(",")}`)
-      .join("\n");
-    console.log(`Choose your dice:\n${diceChoices}\nX - exit\n? - help`);
-
-    const selection = this.cli.promptUser("Your selection: ");
-
-    if (selection === "X" || selection === "x") {
-      console.log("Exiting the game.");
-      return;
-    }
-
-    if (selection === "?") {
-      this.cli.showHelp();
-      this.makeThrow(player);
-      return;
-    }
-
-    const diceIndex = parseInt(selection);
-    if (
-      !isNaN(diceIndex) &&
-      diceIndex >= 0 &&
-      diceIndex < this.diceArray.length
-    ) {
-      const selectedDice = this.diceArray[diceIndex];
-      if (player === "user") {
-        this.userRoll(selectedDice);
+    this.handleUserSelection("Your selection: ", (userSelection) => {
+      console.log(`My selection: ${computerSelection} (KEY=${key}).`);
+      if (userSelection === computerSelection) {
+        console.log("You make the first move and select your dice first.");
+        this.userSelectDice();
       } else {
-        this.computerRoll(selectedDice);
+        console.log("I make the first move and choose my dice first.");
+        this.computerSelectDice();
       }
+    });
+  }
+
+  userSelectDice() {
+    console.log("Choose your dice:");
+    this.diceArray.forEach((dice, index) => {
+      console.log(`${index} - ${dice.sides.join(",")}`);
+    });
+    console.log("X - exit\n? - help");
+
+    this.handleUserSelection("Your selection: ", (diceIndex) => {
+      if (diceIndex >= 0 && diceIndex < this.diceArray.length) {
+        const selectedDice = this.diceArray[diceIndex];
+        console.log(`You choose the [${selectedDice.sides.join(",")}] dice.`);
+        this.userDice = selectedDice;
+        this.computerSelectDifferentDice(diceIndex);
+      } else {
+        console.log("Invalid selection. Please try again.");
+        this.userSelectDice();
+      }
+    });
+  }
+
+  computerSelectDifferentDice(userDiceIndex) {
+    const computerDiceIndex = this.diceArray.findIndex(
+      (_, index) => index !== userDiceIndex
+    );
+    this.computerDice = this.diceArray[computerDiceIndex];
+    console.log(`I choose the [${this.computerDice.sides.join(",")}] dice.`);
+    this.proceedWithThrows();
+  }
+
+  computerSelectDice() {
+    const diceIndex = 1; // Assuming computer always chooses the second dice for demonstration
+    const selectedDice = this.diceArray[diceIndex];
+    console.log(`I choose the [${selectedDice.sides.join(",")}] dice.`);
+    this.computerDice = selectedDice;
+    this.userSelectDice();
+  }
+
+  proceedWithThrows() {
+    this.userThrow();
+  }
+
+  userThrow() {
+    console.log("It's time for your throw.");
+
+    const {
+      value: randomValue,
+      key,
+      hmac,
+    } = FairRandomGenerator.generateRandomValue(6);
+
+    console.log(`I selected a random value in the range 0..5 (HMAC=${hmac}).`);
+
+    this.handleUserSelection(
+      "Add your number modulo 6.\n0 - 0\n1 - 1\n2 - 2\n3 - 3\n4 - 4\n5 - 5\nX - exit\n? - help\nYour selection: ",
+      (userValue) => {
+        const result = (randomValue + userValue) % 6;
+        console.log(`My number is ${randomValue} (KEY=${key}).`);
+        console.log(
+          `The result is ${randomValue} + ${userValue} = ${result} (mod 6).`
+        );
+        const userThrow = this.userDice.sides[result];
+        console.log(`Your throw is ${userThrow}.`);
+
+        this.userScore += userThrow;
+
+        this.computerThrow();
+      }
+    );
+  }
+
+  computerThrow() {
+    console.log("It's time for my throw.");
+
+    const {
+      value: randomValue,
+      key,
+      hmac,
+    } = FairRandomGenerator.generateRandomValue(6);
+
+    console.log(`I selected a random value in the range 0..5 (HMAC=${hmac}).`);
+
+    this.handleUserSelection(
+      "Add your number modulo 6.\n0 - 0\n1 - 1\n2 - 2\n3 - 3\n4 - 4\n5 - 5\nX - exit\n? - help\nYour selection: ",
+      (computerValue) => {
+        const result = (randomValue + computerValue) % 6;
+        console.log(`My number is ${randomValue} (KEY=${key}).`);
+        console.log(
+          `The result is ${randomValue} + ${computerValue} = ${result} (mod 6).`
+        );
+        const computerThrow = this.computerDice.sides[result];
+        console.log(`My throw is ${computerThrow}.`);
+
+        this.computerScore += computerThrow;
+
+        this.announceWinner();
+      }
+    );
+  }
+
+  announceWinner() {
+    if (this.userScore > this.computerScore) {
+      console.log(`You win (${this.userScore} > ${this.computerScore})!`);
+    } else if (this.computerScore > this.userScore) {
+      console.log(`I win (${this.computerScore} > ${this.userScore})!`);
     } else {
-      console.log("Invalid selection. Please try again.");
-      this.makeThrow(player);
+      console.log(`It's a tie (${this.userScore} = ${this.computerScore})!`);
     }
-  }
 
-  userRoll(selectedDice) {
-    console.log("You roll the dice...");
-    const userRoll = selectedDice.roll();
-    console.log(`You rolled: ${userRoll}`);
-
-    const {
-      value: computerValue,
-      key: computerKey,
-      hmac,
-    } = FairRandomGenerator.generateRandomValue(6);
-    this.computerValue = computerValue;
-    this.computerKey = computerKey;
-    console.log(`My random value (HMAC=${hmac}).`);
-
-    const userSelection = this.cli.promptUser("Add your number modulo 6: ");
-    const userValue = parseInt(userSelection);
-    const result = (computerValue + userValue) % 6;
-
-    console.log(`My number is ${computerValue} (KEY=${computerKey}).`);
-    console.log(`The result is ${result} (mod 6).`);
-    const computerRoll = selectedDice.sides[computerValue];
-    console.log(`My throw is ${computerRoll}.`);
-    console.log(`Your throw is ${userRoll}.`);
-
-    this.userScore += userRoll;
-    this.computerScore += computerRoll;
-    this.turns++;
-    this.checkGameEnd();
-  }
-
-  computerRoll(selectedDice) {
-    console.log("I roll the dice...");
-    const computerRoll = selectedDice.roll();
-    console.log(`I rolled: ${computerRoll}`);
-
-    const {
-      value: userValue,
-      key: userKey,
-      hmac,
-    } = FairRandomGenerator.generateRandomValue(6);
-    this.userValue = userValue;
-    this.userKey = userKey;
-    console.log(`My random value (HMAC=${hmac}).`);
-
-    const computerSelection = this.cli.promptUser("Add your number modulo 6: ");
-    const computerValue = parseInt(computerSelection);
-    const result = (userValue + computerValue) % 6;
-
-    console.log(`My number is ${userValue} (KEY=${userKey}).`);
-    console.log(`The result is ${result} (mod 6).`);
-    const userRoll = selectedDice.sides[userValue];
-    console.log(`My throw is ${computerRoll}.`);
-    console.log(`Your throw is ${userRoll}.`);
-
-    this.userScore += userRoll;
-    this.computerScore += computerRoll;
-    this.turns++;
     this.checkGameEnd();
   }
 
@@ -163,11 +160,8 @@ class Game {
     if (this.turns >= 6) {
       this.endRound();
     } else {
-      if (this.turns % 2 === 0) {
-        this.userTurn();
-      } else {
-        this.computerTurn();
-      }
+      this.turns++;
+      this.playRound();
     }
   }
 
@@ -183,14 +177,24 @@ class Game {
     } else {
       console.log("It's a tie!");
     }
+    this.endGame();
   }
 
   endGame() {
     console.log("Game over!");
   }
 
-  processSelection(diceIndex) {
-    console.log(`Processing selection: ${diceIndex}`);
+  handleUserSelection(promptText, callback) {
+    let selection = this.cli.promptUser(promptText);
+    if (selection === "X" || selection === "x") {
+      console.log("Exiting the game.");
+      return;
+    }
+    if (selection === "?") {
+      this.cli.showHelp();
+      selection = this.cli.promptUser(promptText); // Prompt again after showing help
+    }
+    callback(parseInt(selection));
   }
 }
 

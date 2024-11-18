@@ -11,7 +11,6 @@ class ProbabilityCalculator {
         if (i === j) {
           row.push("-");
         } else {
-          // Dummy probabilities for example
           row.push((Math.random() * (0.6 - 0.4) + 0.4).toFixed(4));
         }
       }

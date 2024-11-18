@@ -75,7 +75,7 @@ class Game {
   }
 
   computerSelectDice() {
-    const diceIndex = 1; // Assuming computer always chooses the second dice for demonstration
+    const diceIndex = 1;
     const selectedDice = this.diceArray[diceIndex];
     console.log(`I choose the [${selectedDice.sides.join(",")}] dice.`);
     this.computerDice = selectedDice;

@@ -1,3 +1,4 @@
+// HMACGenerator.js
 const crypto = require("crypto");
 
 class HMACGenerator {
@@ -5,8 +6,10 @@ class HMACGenerator {
     return crypto.randomBytes(32).toString("hex");
   }
 
-  static generateHMAC(key, message) {
-    return crypto.createHmac("sha3-256", key).update(message).digest("hex");
+  static generateHMAC(key, value) {
+    const hmac = crypto.createHmac("sha256", key);
+    hmac.update(value);
+    return hmac.digest("hex");
   }
 }
 

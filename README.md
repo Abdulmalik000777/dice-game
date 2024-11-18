@@ -1,54 +1,59 @@
-Dice Game
-A dice game where two players (user and computer) compete by selecting dice and rolling them to determine the winner. The game uses HMAC for fair random generation to ensure that the computer's selection is transparent and verifiable.
+README.mdTemplate
+markdown
+# Dice Game
 
-Getting Started
-Prerequisites
-Node.js (v20.15.1 or later)
+This is a Dice Game project developed as part of a coding challenge. The game allows two players to select different dice and perform throws to determine the winner.
 
-npm (v6.14.8 or later)
+## Table of Contents
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Help Table](#help-table)
+- [Contact](#contact)
 
-Installation
-Clone the repository:
+## Overview
+The game starts by determining who makes the first move through a fair random selection. Players then select different dice and perform their throws. The order of throws is unimportant as players use different dice. The game announces the winner based on the results of the throws.
 
-bash
-git clone https://github.com/Abdulmalik000777/Dice-game.git
-cd dice-game
-Install dependencies:
+## Installation
+To run this project, you will need Node.js installed on your machine. Follow these steps to set up the project:
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/Abdulmalik000777/dice-game.git
+   cd dice-game
+Install the required dependencies:
 
 bash
 npm install
-Configuration
-Create a .env file in the root directory and add the following line:
-
-plaintext
-DICE_ARGS="2,2,4,4,9,9 6,8,1,1,8,6 7,5,3,7,5,3"
-Running the Game
-Start the game:
+Usage
+To start the game, use the following command:
 
 bash
-npm start
-Usage
-The game will prompt you to guess a random value to determine who goes first.
-
-After the first move is determined, both players select their dice.
-
-The dice are rolled, and the results are displayed to determine the winner.
-
-Launch with Different Parameters
-4 Identical Dice:
+node index.js [dice configurations]
+Example Commands:
+Four identical dice:
 
 bash
 node index.js 1,2,3,4,5,6 1,2,3,4,5,6 1,2,3,4,5,6 1,2,3,4,5,6
-3 Dice:
+Three different dice:
 
 bash
 node index.js 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7
-Launch with Incorrect Parameters
+Examples
+Launch with Different Parameters:
+Four Identical Dice:
+bash
+node index.js 1,2,3,4,5,6 1,2,3,4,5,6 1,2,3,4,5,6 1,2,3,4,5,6
+Three Different Dice:
+bash
+node index.js 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7
+Launch with Incorrect Parameters:
 No Dice:
 
 bash
 node index.js
-2 Dice:
+Two Dice:
 
 bash
 node index.js 1,2,3,4,5,6 1,2,3,4,5,6
@@ -60,42 +65,22 @@ Non-Integer Value:
 
 bash
 node index.js 1,2,3,4,5,6 1,2,3,4,5,a
-Help Table with Probabilities
-Display the probability table:
+Help Table
+During the game, type ? and press Enter to see the probability of winning for different dice configurations.
 
-bash
-node index.js 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7
-When prompted, type ? and press Enter.
+Example Output:
+Probability of the win for the user:
+User Dice       2,2,4,4,9,9     1,1,6,6,8,8     3,3,5,5,7,7
+2,2,4,4,9,9     -               0.5200          0.4148
+1,1,6,6,8,8     0.5751          -               0.5443
+3,3,5,5,7,7     0.5298          0.4971          -
+Contact
+If you have any questions or need further assistance, please contact:
 
-Whole Game Played with Results
-Run the game and play through:
+Email: your.email@example.com
 
-bash
-node index.js 2,2,4,4,9,9 1,1,6,6,8,8 3,3,5,5,7,7
-Play the game at least twice to capture the complete output.
+GitHub: Abdulmalik000777
 
-HMAC Calculation
-The game uses HMAC to ensure fairness:
+Feel free to customize this template according to your needs. Make sure to replace placeholder text with actual information relevant to your project.
 
-Generate a Key: A secure random key is generated.
-
-Calculate HMAC: HMAC is calculated using the key and the computer's value.
-
-Reveal Key: The key is revealed after the user makes their selection, allowing the user to verify the HMAC.
-
-Repository Structure
-dice-game/
-│
-├── .env
-├── index.js
-├── package.json
-├── package-lock.json
-├── Dice.js
-├── Game.js
-├── FairRandomGenerator.js
-├── CLI.js
-├── HMACGenerator.js
-├── ProbabilityCalculator.js
-└── README.md
-Contributing
-Contributions are welcome! Please fork this repository and submit a pull request with your improvements.
+Good luck with your submission! 😊 If you need any more assistance, I'm here to help.

@@ -6,9 +6,7 @@ const args = process.argv.slice(2);
 const diceConfigs = args.map((arg) => {
   const config = arg.split(",").map(Number);
   if (config.some(isNaN) || config.length !== 6) {
-    console.error(
-      "Error: Each dice configuration must contain exactly six integers."
-    );
+    console.error("Error: Each dice configuration must contain exactly six integers.");
     process.exit(1);
   }
   return config;

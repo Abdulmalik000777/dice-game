@@ -1,18 +1,6 @@
-<<<<<<< HEAD
-// CLI.js
-const readline = require("readline-sync");
-
-class CLI {
-  static promptUser(prompt) {
-    return readline.question(prompt);
-  }
-
-  static showHelp() {
-    console.log("Help: Choose a dice by entering the corresponding number.");
-=======
 const ProbabilityCalculator = require("./ProbabilityCalculator");
-const chalk = require("chalk");
-const Table = require("cli-table3");
+const chalk = require('chalk');
+const Table = require('cli-table3');
 
 class CLI {
   constructor(diceArray) {
@@ -41,8 +29,8 @@ class CLI {
     console.log(chalk.green("Probability of the win for the user:"));
 
     const table = new Table({
-      head: ["User Dice", ...this.diceArray.map((d) => d.join(","))],
-      colWidths: [15, 15, 15, 15], // Adjust widths as needed
+      head: ['User Dice', ...this.diceArray.map(d => d.join(","))],
+      colWidths: [15, 15, 15, 15] // Adjust widths as needed
     });
 
     probabilities.forEach((row, i) => {
@@ -50,7 +38,6 @@ class CLI {
     });
 
     console.log(table.toString());
->>>>>>> revert-to-cea0843e
   }
 }
 
